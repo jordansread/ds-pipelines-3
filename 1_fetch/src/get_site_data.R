@@ -1,6 +1,6 @@
 # download data for each site
-get_site_data <- function(sites_info, state, parameter) {
-  site_info <- filter(sites_info, state_cd == state)
+get_site_data <- function(site_info_file, state, parameter) {
+  site_info <- readr::read_tsv(site_info_file, col_types='cccddcDDi')
   message(sprintf('Retrieving data for site %s', site_info$site_no))
 
   # simulate an unreliable web service or internet connection by causing random failures
