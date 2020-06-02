@@ -24,9 +24,8 @@ targets:
     command: c(I('00060'))
 
   state_tasks:
-    command: do_state_tasks(remakefile = '123_state_tasks.yml', oldest_active_sites)
+    command: do_state_tasks(remakefile = '123_state_tasks.yml', oldest_active_sites, '1_fetch/src/get_site_data.R','3_visualize/src/plot_site_data.R', '2_process/src/tally_site_obs.R')
     depends:
-      - 1_fetch/src/get_site_data.R
       - parameter
 
   # Identify oldest sites

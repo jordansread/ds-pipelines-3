@@ -1,4 +1,6 @@
-do_state_tasks <- function(remakefile, oldest_active_sites) {
+do_state_tasks <- function(remakefile, oldest_active_sites, ...) {
+
+  sources <- c(...)
 
   split_inventory(summary_file = '1_fetch/tmp/state_splits.yml', sites_info = oldest_active_sites)
   # Define task table rows
@@ -15,17 +17,37 @@ do_state_tasks <- function(remakefile, oldest_active_sites) {
     }
   )
 
+  plot_step <- create_task_step(
+    step_name = 'plot',
+    target_name = function(task_name, step_name, ...) {
+      sprintf('3_visualize/out/timeseries_%s.png', task_name)
+    },
+    command = function(task_name, ...){
+      sprintf("plot_site_data(target_name, site_data = %s_data, parameter = parameter)", task_name)
+    }
+  )
+
+  tally_step <- create_task_step(
+    step_name = 'tally',
+    target_name = function(task_name, step_name, ...) {
+      sprintf('%s_tally', task_name)
+    },
+    command = function(task_name, ...){
+      sprintf("tally_site_obs(site_data = %s_data)", task_name)
+    }
+  )
+
   task_plan <- create_task_plan(
     task_names = tasks,
-    task_steps = list(download_step),
+    task_steps = list(download_step, plot_step, tally_step),
     add_complete = FALSE)
 
   # Create the task remakefile
   create_task_makefile(
     task_plan = task_plan,
     makefile = remakefile,
-    packages = c('dataRetrieval','dplyr'),
-    sources = '1_fetch/src/get_site_data.R',
+    packages = c('dataRetrieval','dplyr', 'ggplot2', 'lubridate'),
+    sources = sources,
     include = 'remake.yml',
     tickquote_combinee_objects = FALSE,
     finalize_funs = c())
