@@ -5,7 +5,7 @@ get_site_data <- function(sites_info, state, parameter) {
 
   # simulate an unreliable web service or internet connection by causing random failures
   if(runif(1) < 0.5) {
-    Sys.sleep(2)
+    Sys.sleep(0.1)
     stop('Ugh, the internet data transfer failed! Try again.')
   }
 
