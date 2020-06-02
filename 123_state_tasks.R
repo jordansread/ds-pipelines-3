@@ -39,7 +39,8 @@ do_state_tasks <- function(remakefile, oldest_active_sites, ...) {
 
   task_plan <- create_task_plan(
     task_names = tasks,
-    task_steps = list(download_step, plot_step, tally_step),
+    task_steps = list(download_step, tally_step, plot_step),
+    final_steps = c('tally','plot'),
     add_complete = FALSE)
 
   # Create the task remakefile
@@ -49,13 +50,27 @@ do_state_tasks <- function(remakefile, oldest_active_sites, ...) {
     packages = c('dataRetrieval','dplyr', 'ggplot2', 'lubridate'),
     sources = sources,
     include = 'remake.yml',
-    tickquote_combinee_objects = FALSE,
-    finalize_funs = c())
+    final_targets = c('combined_tally', '3_visualize/out/timeseries_plots.yml'),
+    finalize_funs = c('combine_tallies', 'summarize_timeseries_plots'),
+    tickquote_combinee_objects=TRUE,
+    as_promises=FALSE)
 
-  scmake(tools::file_path_sans_ext(remakefile), remake_file=remakefile)
-  return()
+  combined_tally <- scmake('combined_tally', remake_file=remakefile)
+
+
+  timeseries_plots_info <- scmake('3_visualize/out/timeseries_plots.yml', remake_file=remakefile)
+  timeseries_plots_info <- yaml::yaml.load_file('3_visualize/out/timeseries_plots.yml') %>%
+    tibble::enframe(name = 'filename', value = 'hash') %>%
+    mutate(hash = purrr::map_chr(hash, `[[`, 1))
+
+
+  return(list(obs_tallies=combined_tally, timeseries_plots_info=timeseries_plots_info))
 }
 
+combine_tallies <- function(...){
+  dots <- list(...)
+  tally_dots <- dots[purrr::map_lgl(dots, is_tibble)]
+}
 
 split_inventory <- function(summary_file, sites_info) {
 
@@ -68,4 +83,12 @@ split_inventory <- function(summary_file, sites_info) {
   }
 
   scipiper::sc_indicate(ind_file = summary_file, data_file = sort(files_out))
+}
+
+summarize_timeseries_plots <- function(ind_file, ...) {
+  # filter to just those arguments that are character strings (because the only
+  # step outputs that are characters are the plot filenames)
+  dots <- list(...)
+  plot_dots <- dots[purrr::map_lgl(dots, is.character)]
+  do.call(combine_to_ind, c(list(ind_file), plot_dots))
 }
