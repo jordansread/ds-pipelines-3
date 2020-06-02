@@ -36,10 +36,10 @@ targets:
       - parameter
 
   obs_tallies:
-    command: pluck(state_combiners, I('obs_tallies'))
+    command: pluck(state_combiners, target_name)
 
   timeseries_plots_info:
-    command: pluck(state_combiners, I('timeseries_plots_info'))
+    command: pluck(state_combiners, target_name)
 
   # Identify oldest sites
   oldest_active_sites:
