@@ -1,0 +1,8 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+1_fetch/tmp/*
+.remake/
+!1_fetch/tmp/state_splits.yml
+3_visualize/out/*.png
