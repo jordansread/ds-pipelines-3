@@ -9,29 +9,25 @@ sources:
   - 1_fetch/src/find_oldest_sites.R
   - 1_fetch/src/get_site_data.R
   - 3_visualize/src/map_sites.R
+  - 123_state_tasks.R
 
 targets:
   main:
     depends:
       - 3_visualize/out/site_map.png
-      - wi_data
-      - mn_data
-      - mi_data
+      - state_tasks
 
   # Configuration
   states:
-    command: c(I(c('WI','MN','MI')))
+    command: c(I(c('WI','MN','MI','IL')))
   parameter:
     command: c(I('00060'))
 
-  wi_data:
-    command: get_site_data(oldest_active_sites, state = I("WI"), parameter = parameter)
-
-  mn_data:
-    command: get_site_data(oldest_active_sites, state = I("MN"), parameter = parameter)
-
-  mi_data:
-    command: get_site_data(oldest_active_sites, state = I("MI"), parameter = parameter)
+  state_tasks:
+    command: do_state_tasks(remakefile = '123_state_tasks.yml', oldest_active_sites)
+    depends:
+      - 1_fetch/src/get_site_data.R
+      - parameter
 
   # Identify oldest sites
   oldest_active_sites:
