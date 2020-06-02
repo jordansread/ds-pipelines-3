@@ -6,3 +6,5 @@
 .remake/
 !1_fetch/tmp/state_splits.yml
 3_visualize/out/*.png
+**.DS_Store
+3_visualize/out/*.html
